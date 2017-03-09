@@ -6,9 +6,10 @@
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 static MunitResult
 test_safe_generic(const MunitParameter params[], void* user_data) {
+  unsigned long long a = 1, b = 1, res;
+
   (void) params;
   (void) user_data;
-  unsigned long long a = 1, b = 1, res;
 
   do {
     if (!psnip_safe_add(&res, a, b)) {
@@ -28,9 +29,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
 #define DEFINE_PSNIP_SAFE_TESTS(T, name, min, max) \
   static MunitResult \
   test_safe_##name##_add(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_true(psnip_safe_##name##_add(&result, 0, 1)); \
     munit_assert_##name(result, ==, 1); \
     munit_assert_true(psnip_safe_##name##_add(&result, 1, 1)); \
@@ -43,9 +44,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
   \
   static MunitResult \
   test_safe_##name##_sub(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_true(psnip_safe_##name##_sub(&result, 1, 1)); \
     munit_assert_##name(result, ==, 0); \
     munit_assert_false(psnip_safe_##name##_sub(&result, min, 1)); \
@@ -56,9 +57,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
   \
   static MunitResult \
   test_safe_##name##_mul(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_true(psnip_safe_##name##_mul(&result, 2, 2)); \
     munit_assert_##name(result, ==, 4); \
     munit_assert_true(psnip_safe_##name##_mul(&result, 0, max)); \
@@ -72,9 +73,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
   \
   static MunitResult \
   test_safe_##name##_div(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_true(psnip_safe_##name##_div(&result, 2, 2)); \
     munit_assert_##name(result, ==, 1); \
     munit_assert_false(psnip_safe_##name##_div(&result, 1, 0)); \
@@ -84,9 +85,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
   \
   static MunitResult \
   test_safe_##name##_mod(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_true(psnip_safe_##name##_mod(&result, 10, 4)); \
     munit_assert_##name(result, ==, 2); \
     munit_assert_false(psnip_safe_##name##_mod(&result, 1, 0)); \
@@ -98,9 +99,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
   DEFINE_PSNIP_SAFE_TESTS(T, name, min, max) \
   static MunitResult \
   test_safe_##name##_div_signed(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_false(psnip_safe_##name##_div(&result, min, -1)); \
     munit_assert_##name(result, ==, min); \
     return MUNIT_OK; \
@@ -108,9 +109,9 @@ test_safe_generic(const MunitParameter params[], void* user_data) {
   \
   static MunitResult \
   test_safe_##name##_neg_signed(const MunitParameter params[], void* user_data) { \
+    T result; \
     (void) params; \
     (void) user_data; \
-    T result; \
     munit_assert_true(psnip_safe_##name##_neg(&result, max)); \
     munit_assert_##name(result, ==, -max); \
     munit_assert_false(psnip_safe_##name##_neg(&result, min)); \

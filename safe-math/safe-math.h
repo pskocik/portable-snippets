@@ -63,6 +63,12 @@
 #  define PSNIP_SAFE__FUNCTION PSNIP_SAFE__COMPILER_ATTRIBUTES static PSNIP_SAFE__INLINE
 #endif
 
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#  define psnip_safe_bool _Bool
+#else
+#  define psnip_safe_bool int
+#endif
+
 #if !defined(PSNIP_SAFE_NO_FIXED)
 #  include <stdint.h>
 #endif /* !defined(PSNIP_SAFE_NO_FIXED) */
@@ -383,13 +389,13 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
 #endif /* !defined(PSNIP_SAFE_NO_PROMOTIONS) */
 
 #define PSNIP_SAFE_DEFINE_BUILTIN_BINARY_OP(T, name, op_name) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_##op_name(T* res, T a, T b) { \
     return !__builtin_##op_name##_overflow(a, b, res); \
   }
 
 #define PSNIP_SAFE_DEFINE_PROMOTED_SIGNED_BINARY_OP(T, name, op_name, min, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_##op_name(T* res, T a, T b) { \
     const psnip_safe_##name##_larger r = psnip_safe_larger_##name##_##op_name(a, b); \
     *res = (T) r; \
@@ -397,7 +403,7 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_PROMOTED_UNSIGNED_BINARY_OP(T, name, op_name, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_##op_name(T* res, T a, T b) { \
     const psnip_safe_##name##_larger r = psnip_safe_larger_##name##_##op_name(a, b); \
     *res = (T) r; \
@@ -405,9 +411,9 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_SIGNED_ADD(T, name, min, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_add (T* res, T a, T b) { \
-    _Bool r = !( ((b > 0) && (a > (max - b))) ||   \
+    psnip_safe_bool r = !( ((b > 0) && (a > (max - b))) ||   \
                  ((b < 0) && (a < (max - b))) ); \
     if(PSNIP_SAFE_LIKELY(r)) \
         *res = a + b; \
@@ -415,16 +421,16 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_UNSIGNED_ADD(T, name, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_add (T* res, T a, T b) { \
     *res = (T) (a + b); \
     return !PSNIP_SAFE_UNLIKELY((b > 0) && (a > (max - b))); \
   }
 
 #define PSNIP_SAFE_DEFINE_SIGNED_SUB(T, name, min, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_sub (T* res, T a, T b) { \
-      _Bool r = !((b > 0 && a < min + b) || \
+      psnip_safe_bool r = !((b > 0 && a < min + b) || \
                   (b < 0 && a > max + b)); \
       if(PSNIP_SAFE_LIKELY(r)) \
           *res = a - b; \
@@ -432,16 +438,16 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_UNSIGNED_SUB(T, name, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_sub (T* res, T a, T b) { \
       *res = a - b; \
       return !PSNIP_SAFE_UNLIKELY(b > a); \
   }
 
 #define PSNIP_SAFE_DEFINE_SIGNED_MUL(T, name, min, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_mul (T* res, T a, T b) { \
-    _Bool r = 1;  \
+    psnip_safe_bool r = 1;  \
     if (a > 0) { \
       if (b > 0) { \
         if (a > (max / b)) { \
@@ -469,14 +475,14 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_UNSIGNED_MUL(T, name, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_mul (T* res, T a, T b) { \
     *res = (T) (a * b); \
     return !PSNIP_SAFE_UNLIKELY((a > 0) && (b > 0) && (a > (max / b))); \
   }
 
 #define PSNIP_SAFE_DEFINE_SIGNED_DIV(T, name, min, max)   \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_div (T* res, T a, T b) { \
     if (PSNIP_SAFE_UNLIKELY(b == 0)) { \
       *res = 0; \
@@ -491,7 +497,7 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_UNSIGNED_DIV(T, name, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_div (T* res, T a, T b) { \
     if (PSNIP_SAFE_UNLIKELY(b == 0)) { \
       *res = 0; \
@@ -503,7 +509,7 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_SIGNED_MOD(T, name, min, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_mod (T* res, T a, T b) { \
     if (PSNIP_SAFE_UNLIKELY(b == 0)) { \
       *res = 0; \
@@ -518,7 +524,7 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_UNSIGNED_MOD(T, name, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_mod (T* res, T a, T b) { \
     if (PSNIP_SAFE_UNLIKELY(b == 0)) { \
       *res = 0; \
@@ -530,7 +536,7 @@ PSNIP_SAFE_DEFINE_LARGER_UNSIGNED_OPS(uint64_t, uint64)
   }
 
 #define PSNIP_SAFE_DEFINE_SIGNED_NEG(T, name, min, max) \
-  PSNIP_SAFE__FUNCTION _Bool \
+  PSNIP_SAFE__FUNCTION psnip_safe_bool \
   psnip_safe_##name##_neg (T* res, T value) { \
     *res = -value; \
     return !PSNIP_SAFE_UNLIKELY(value == min); \

@@ -13,13 +13,13 @@ static uint8_t buffer[1024 * 1024];
 
 static MunitResult
 test_unaligned_uint64(const MunitParameter params[], void* data) {
+  uint64_t v;
+  uint8_t* c = buffer;
+  uint8_t* e = &(buffer[sizeof(buffer)]) - sizeof(v);
+
   (void) params;
   (void) data;
 
-  uint64_t v;
-
-  uint8_t* c = buffer;
-  uint8_t* e = &(buffer[sizeof(buffer)]) - sizeof(v);
   while (c <= e) {
     munit_rand_memory(sizeof(v), (uint8_t*) &v);
     v ^= psnip_unaligned_load_uint64(c);
@@ -33,13 +33,13 @@ test_unaligned_uint64(const MunitParameter params[], void* data) {
 
 static MunitResult
 test_unaligned_uint32(const MunitParameter params[], void* data) {
+  uint32_t v;
+  uint8_t* c = buffer;
+  uint8_t* e = &(buffer[sizeof(buffer)]) - sizeof(v);
+
   (void) params;
   (void) data;
 
-  uint32_t v;
-
-  uint8_t* c = buffer;
-  uint8_t* e = &(buffer[sizeof(buffer)]) - sizeof(v);
   while (c <= e) {
     munit_rand_memory(sizeof(v), (uint8_t*) &v);
     v ^= psnip_unaligned_load_uint32(c);
@@ -53,13 +53,13 @@ test_unaligned_uint32(const MunitParameter params[], void* data) {
 
 static MunitResult
 test_unaligned_uint16(const MunitParameter params[], void* data) {
+  uint16_t v;
+  uint8_t* c = buffer;
+  uint8_t* e = &(buffer[sizeof(buffer)]) - sizeof(v);
+
   (void) params;
   (void) data;
 
-  uint16_t v;
-
-  uint8_t* c = buffer;
-  uint8_t* e = &(buffer[sizeof(buffer)]) - sizeof(v);
   while (c <= e) {
     munit_rand_memory(sizeof(v), (uint8_t*) &v);
     v ^= psnip_unaligned_load_uint16(c);
@@ -97,22 +97,22 @@ __attribute__((__optnone__,__noinline__))
 #endif
 static MunitResult
 test_unaligned_uint64_tempt(const MunitParameter params[], void* data) {
+  static uint8_t buffer2[sizeof(buffer)];
+  uint8_t buffer_x = 0;
+  uint8_t buffer_y = 0;
+  size_t i;
+
   (void) params;
   (void) data;
 
   munit_rand_memory(sizeof(buffer), buffer);
 
-  static uint8_t buffer2[sizeof(buffer)];
 
   dangerous_copy((sizeof(buffer) / sizeof(psnip_uint64_t)) - 1,
 		 (void*) (buffer2 + 1), (void*) (buffer + 1));
 
   /* XOR all the data together, just to try to convince the compiler
    * not to optimize anything away. */
-
-  uint8_t buffer_x = 0;
-  uint8_t buffer_y = 0;
-  size_t i;
 
   for (i = 1 ; i < (sizeof(buffer) - (sizeof(psnip_uint64_t) - 1)) ; i++) {
     buffer_x ^= buffer[i];
